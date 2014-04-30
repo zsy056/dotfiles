@@ -1,179 +1,50 @@
-# History, Cache {{{
-local ZSH_CACHE=~/.cache/zsh
-HISTFILE=$ZSH_CACHE/histfile
-HISTSIZE=5000
-SAVEHIST=5000
-mkdir -p $ZSH_CACHE
-# }}}
+# Path to your oh-my-zsh configuration.
+ZSH=$HOME/.oh-my-zsh
 
-# Zstyles, Autoload, Completion {{{
-zstyle ':completion:*' completer _complete _ignored _approximate
-zstyle ':completion:*' group-name ''
-zstyle ':completion:*' list-colors ''
-zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}' 'r:|[._-]=** r:|=**' 'l:|=* r:|=*'
-zstyle ':completion:*' max-errors 2
-zstyle ':completion:*' use-cache on
-zstyle ':completion:*' cache-path $ZSH_CACHE/comp_cache
-zstyle ':completion:*:functions' ignored-patterns '_*'
-zstyle ':completion:*' menu select=8
-zstyle ':completion:*' squeeze-slashes true
-zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
-zstyle ':completion:*:*:kill:*:processes' command 'ps xo pid,user:10,cmd | grep -v "zsh$" | grep -v "\ssshd:"'
-zstyle ':vcs_info:*' formats '%F{cyan}%s %B%b%f '
-zstyle ':vcs_info:*' enable git svn
-zstyle ':chpwd:*' recent-dirs-file $ZSH_CACHE/chpwd_recent
+# Set name of the theme to load.
+# Look in ~/.oh-my-zsh/themes/
+# Optionally, if you set this to "random", it'll load a random theme each
+# time that oh-my-zsh is loaded.
+ZSH_THEME="candy"
 
-autoload -Uz compinit vcs_info zmv zcp zln add-zsh-hook zed zfinit select-word-style
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"
 
-# zftp
-zfinit
+# Set to this to use case-sensitive completion
+# CASE_SENSITIVE="true"
 
-# backward kill word now stops at /
-select-word-style bash
+# Comment this out to disable bi-weekly auto-update checks
+# DISABLE_AUTO_UPDATE="true"
 
-# custom completion scripts
-local CUSTOM_COMP_PATH=~/.profile.d/zcompletion
-[[ -d $CUSTOM_COMP_PATH ]] && fpath=($CUSTOM_COMP_PATH $fpath)
-compinit
-# }}}
+# Uncomment to change how often before auto-updates occur? (in days)
+# export UPDATE_ZSH_DAYS=13
 
-# Setopt, Bindkey {{{
-setopt append_history inc_append_history autocd cshnullglob extendedglob short_loops hist_ignore_space hist_ignore_dups prompt_subst
-bindkey -v
-bindkey '^A' beginning-of-line
-bindkey '^E' end-of-line
-bindkey '^K' kill-line
-bindkey '^L' clear-screen
-bindkey '^R' history-incremental-search-backward
-bindkey '^W' backward-kill-word
-bindkey '^[.' insert-last-word
-# auto replace ... to ../.. (from zsh-lovers, modified)
-rationalise-dot() {
-    if [[ $LBUFFER = *.. ]] && [[ "$LBUFFER" = "$BUFFER" ]] && [[ "$KEYS" == "." ]]; then
-        LBUFFER+=/..
-    else
-        zle .self-insert "$@"
-    fi
-}
-zle -N self-insert rationalise-dot
-# }}}
+# Uncomment following line if you want to disable colors in ls
+# DISABLE_LS_COLORS="true"
 
-# Prompt {{{
-# vcs_info_wrapper
-_vcs_info() {
-  vcs_info
-  [[ -n "$vcs_info_msg_0_" ]] && echo -n "${vcs_info_msg_0_}"
-}
+# Uncomment following line if you want to disable autosetting terminal title.
+# DISABLE_AUTO_TITLE="true"
 
-if [[ -n "$SSH_TTY" ]]; then
-	export PS1="%F{cyan}%U%n@%m%u%f %B%F{red}%(?..[%?] )%f%F{cyan}%#%f%b "
-else
-	export PS1="%F{g}%U%n%u%f %B%F{red}%(?..[%?] )%f%F{g}%#%f%b "
-fi
+# Uncomment following line if you want to disable command autocorrection
+# DISABLE_CORRECTION="true"
 
-export RPS1='$(_vcs_info)'"%B%F{yellow}%~%f%b"
-# }}}
+# Uncomment following line if you want red dots to be displayed while waiting for completion
+# COMPLETION_WAITING_DOTS="true"
 
-# No Beep {{{
-setterm -blength 0
-# }}}
+# Uncomment following line if you want to disable marking untracked files under
+# VCS as dirty. This makes repository status check for large repositories much,
+# much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
 
-# Title, Paths {{{
-# change title
-title() {
-    [ $TERM != 'linux' ] && print -Pn "\e]2;$@\a"
-}
+# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
+# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+plugins=(git rvm)
 
-chpwd() {
-    # push current path to $path_history (use zsh cdr instead)
-    [[ -z $cb_flag ]] && path_history+=($PWD)
-}
+source $ZSH/oh-my-zsh.sh
 
-preexec() {
-    # modify title to command name
-    # if in ssh, add hostname
-    # if $TITLE is non-empty, use it
-    emulate -L zsh
-    local -a cmd
-    cmd=(${(z)1})
-    [[ -n "$TITLE" ]] && cmd[1]="$TITLE"
-    if [[ -z "$SSH_CLIENT" ]]; then
-        title $cmd[1]:t "$cmd[2,-1]"
-    else
-        title "%m: " $cmd[1]:t "$cmd[2,-1]"
-    fi
-}
+# Customize to your needs...
+export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/core_perl:/usr/lib/smlnj/bin/:$HOME/bin
 
-precmd() {
-    # modify title to partial path
-    # if in ssh, add hostname
-    if [[ -z "$SSH_CLIENT" ]]; then
-        title "%2c"
-    else
-        title "%m: %2c"
-    fi
-}
-
-cb() {
-    # pop current pwd
-    path_history[-1]=()
-    # set flag
-    cb_flag=1
-    # top, -1 means the last element
-    cd $path_history[-1]
-    # unset flag
-    unset cb_flag
-}
-
-precmd
-# }}}
-
-# Basic alias {{{
-# short names
-alias la='ls -A'
-alias ll='ls -lh'
-alias l='ls -CF'
-alias md='mkdir -p'
-alias rd='rmdir'
-alias bd='bg && disown'
-# default parameters
-alias ls='ls --color=auto'
-alias rm='rm -v'
-alias mv='mv -vi'
-alias cp='cp -aviu'
-alias scp='noglob scp -r'
-# suffix
-alias -g L='| less'
-alias -g N='&> /dev/null'
-alias -g S='&> /dev/null &!'
-alias -g CE='2> >(while read line; do print "\e[91m"${(q)line}"\e[0m"; done)'
-alias -g EL='|& less'
-alias -g H='| head'
-alias -g EH='|& head'
-alias -g T='| tail'
-alias -g ET='|& tail'
-alias -g M='| most'
-alias -g EM='|& most'
-alias -g G='| gvim -'
-alias -g EG='|& gvim -'
-# }}}
-
-# Load other stuff {{{
-for i in /etc/profile.d/*.{sh,zsh} ~/.profile.d/*.{sh,zsh}; do
-    source $i
-done
-# }}}
-
-# Security {{{
-# Auto logout VT in 10 minutes
-[[ -z "$DISPLAY" ]] && [[ -z "$SSH_CLIENT" ]] && TMOUT=600
-# }}}
-
-# Deprecated {{{
-# cdr (now use autojump)
-if ! which autojump &>/dev/null; then
-    autoload -Uz chpwd_recent_dirs cdr 
-    add-zsh-hook chpwd chpwd_recent_dirs
-fi
-
-# }}}
+PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
