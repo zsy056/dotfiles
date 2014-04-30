@@ -64,22 +64,22 @@ for i in `find`; do
     fi
 
     # check file datetime
-    if [[ "$HOME/$i" -nt $i ]]; then
+    #if [[ "$HOME/$i" -nt $i ]]; then
         # home has newer file
-        print "\n$fg[white]$i: $fg[red]User has newer version$fg[yellow]"
+        print "\n$fg[white]$i: $fg[red]User has different version$fg[yellow]"
         diff "$i" "$HOME/$i" 
-    else
-        # home has older or different file
-        # need update
-        printf "\n$fg[white]$i: $fg[blue]Updating... "
-        DEST_MOD=`stat -c %a $HOME/$i`
-        DEST_GROUP=`stat -c %g $HOME/$i`
-        DEST_USER=`stat -c %u $HOME/$i`
-
-        # install
-        install -g $DEST_GROUP -o $DEST_USER -m $DEST_MOD -p -T $i $HOME/$i
-        print "Done"
-    fi
+    #else
+    #    # home has older or different file
+    #    # need update
+    #    printf "\n$fg[white]$i: $fg[blue]Updating... "
+    #    DEST_MOD=`stat -c %a $HOME/$i`
+    #    DEST_GROUP=`stat -c %g $HOME/$i`
+    #    DEST_USER=`stat -c %u $HOME/$i`
+    #
+    #    # install
+    #    install -g $DEST_GROUP -o $DEST_USER -m $DEST_MOD -p -T $i $HOME/$i
+    #    print "Done"
+    #fi
 done
 
 print ''

@@ -1,5 +1,14 @@
-include "/usr/share/themes/Mist/gtk-2.0/gtkrc"
-gtk-theme-name="Mist"
-gtk-icon-theme-name="Tango"
-gtk-font-name="Droid Sans 9"
-gtk-can-change-accels=1
+# -- THEME AUTO-WRITTEN DO NOT EDIT
+include "/usr/share/themes/Numix/gtk-2.0/gtkrc"
+
+style "user-font" {
+	font_name = "Microsoft YaHei 10"
+}
+
+widget_class "*" style "user-font"
+
+gtk-font-name="Microsoft YaHei 10"
+
+include "/home/zsy/.gtkrc.mine"
+
+# -- THEME AUTO-WRITTEN DO NOT EDIT
